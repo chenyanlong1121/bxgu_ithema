@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fhh.bxgu.mapper.QuestionMapper">
+    <resultMap id="QuestionMap" type="com.fhh.bxgu.entity.Question">
+        <result column="chapter" jdbcType="INTEGER" property="chapter"/>
+        <result column="exec_id" jdbcType="INTEGER" property="id"/>
+        <result column="exec_desc" jdbcType="VARCHAR" property="desc"/>
+        <result column="choice_a" jdbcType="VARCHAR" property="a"/>
+        <result column="choice_b" jdbcType="VARCHAR" property="b"/>
+        <result column="choice_c" jdbcType="VARCHAR" property="c"/>
+        <result column="choice_d" jdbcType="VARCHAR" property="d"/>
+        <result column="answer" jdbcType="INTEGER" property="answer"/>
+    </resultMap>
+    <resultMap id="ChapterMap" type="com.fhh.bxgu.entity.Chapter">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="count" jdbcType="INTEGER" property="count"/>
+    </resultMap>
+    <insert id="addExerciseZhCn">
+        insert into exec_zh_CN values
+        <foreach collection="question" item="item" index="index" separator=",">
+            (
+            #{item.chapter},
+            #{item.id},
+            #{item.desc},
+            #{item.a},
+            #{item.b},
+            #{item.c},
+            #{item.d},
+            #{item.answer}
+            )
+        </foreach>
+    </insert>
+    <insert id="addExerciseEnUs">
+        insert into exec_en_US values
+        <foreach collection="question" item="item" index="index" separator=",">
+            (
+            #{item.chapter},
+            #{item.id},
+            #{item.desc},
+            #{item.a},
+            #{item.b},
+            #{item.c},
+            #{item.d},
+            #{item.answer}
+            )
+        </foreach>
+    </insert>
+    <select id="getQuestionByChapterIdEnUs" resultMap="QuestionMap">
+        select * from exec_en_US
+        where chapter = #{id}
+    </select>
+    <select id="getQuestionByChapterIdZhCn" resultMap="QuestionMap">
+        select * from exec_zh_CN
+        where chapter = #{id}
+    </select>
+    <select id="getQuestionChapterListEnUs" resultMap="ChapterMap">
+        select c.id as id,c.name_en_US as name,count(*) as count
+        from exec_chapters as c,exec_en_US as e
+        where c.id=e.chapter group by c.id;
+    </select>
+    <select id="getQuestionChapterListZhCn" resultMap="ChapterMap">
+        select c.id as id,c.name_zh_CN as name,count(*) as count
+        from exec_chapters as c,exec_zh_CN as e
+        where c.id=e.chapter group by c.id;
+    </select>
+</mapper>

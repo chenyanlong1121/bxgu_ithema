@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fhh.bxgu.mapper.CourseMapper">
+    <resultMap id="courseInfoMapper" type="com.fhh.bxgu.entity.Course">
+        <result column="imgtitle" jdbcType="VARCHAR" property="imgtitle"/>
+        <result column="intro" jdbcType="VARCHAR" property="intro"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="timestamp" jdbcType="BIGINT" property="timestamp"/>
+        <result column="course_id" jdbcType="INTEGER" property="courseid"/>
+    </resultMap>
+    <resultMap id="VideoInfoMapper" type="com.fhh.bxgu.entity.Video">
+        <result column="chapter_id" jdbcType="INTEGER" property="chapterId"/>
+        <result column="video_id" jdbcType="INTEGER" property="videoId"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="second_title" jdbcType="VARCHAR" property="secondTitle"/>
+        <result column="video_path" jdbcType="VARCHAR" property="videoPath"/>
+    </resultMap>
+    <resultMap id="historyMapper" type="com.fhh.bxgu.entity.History">
+        <result column="time" jdbcType="VARCHAR" property="time"/>
+        <result column="username" jdbcType="VARCHAR" property="userName"/>
+        <result column="videoid" jdbcType="INTEGER" property="videoId"/>
+        <result column="video_title" jdbcType="VARCHAR" property="videoTitle" />
+        <result column="video_second_title" jdbcType="VARCHAR" property="videoSecondTitle"/>
+    </resultMap>
+    <insert id="insertCourseInfoEnUs">
+        insert into course_en_US (imgtitle, title, intro, timestamp) values
+        <foreach collection="courses" item="item" index="index" separator=",">
+            (
+            #{item.imgtitle},
+            #{item.title},
+            #{item.intro},
+            unix_timestamp()
+            )
+        </foreach>
+    </insert>
+    <insert id="insertCourseInfoZhCn">
+        insert into course_zh_CN (imgtitle, title, intro, timestamp) values
+        <foreach collection="courses" item="item" index="index" separator=",">
+            (
+            #{item.imgtitle},
+            #{item.title},
+            #{item.intro},
+            unix_timestamp()
+            )
+        </foreach>
+    </insert>
+    <insert id="insertHistory">
+        replace into history values(now(),#{username},#{courseid})
+    </insert>
+    <select id="getCourseInfoEnUs" resultMap="courseInfoMapper">
+        select * from course_en_US;
+    </select>
+    <select id="getCourseInfoZhCn" resultMap="courseInfoMapper">
+        select * from course_zh_CN;
+    </select>
+    <select id="getVideoInfoZhCn" resultMap="VideoInfoMapper">
+        select v.chapter_id,v.video_id,c.title,
+               v.second_title_zh_CN as second_title,v.video_path
+        from video as v,course_zh_CN as c
+        where v.chapter_id =c.course_id
+    </select>
+    <select id="getVideoInfoEnUs" resultMap="VideoInfoMapper">
+        select v.chapter_id,v.video_id,c.title,
+               v.second_title_en_US as second_title,v.video_path
+        from video as v,course_en_US as c
+        where v.chapter_id =c.course_id
+    </select>
+    <select id="getCourseInfoZhCnById" resultMap="courseInfoMapper">
+        select * from course_zh_CN
+        where course_id=#{course_id}
+    </select>
+    <select id="getCourseInfoEnUsById" resultMap="courseInfoMapper">
+        select * from course_en_US
+        where course_id=#{course_id}
+    </select>
+    <select id="getHistory" resultMap="historyMapper">
+        select h.*, c.title as video_title, v.second_title_zh_CN as video_second_title
+        from history as h,video as v,course_zh_CN as c
+        where v.video_path COLLATE utf8mb4_unicode_ci =cast(h.videoid as char) and c.course_id=v.chapter_id
+            and h.username COLLATE utf8mb4_unicode_ci =#{username}
+    </select>
+</mapper>
